@@ -88,20 +88,44 @@ function RowClick(row) {
   ClearHover();
 }
 
-function hexLClick(hex) {
-  if (hex.style.backgroundColor != 'darkgreen') {
-    hex.style.backgroundColor = 'darkgreen';
-  } else {
-    hex.style.backgroundColor = '';
+function hasClass(el, className) {
+  if (el.classList)
+    return el.classList.contains(className)
+  else
+    return !!el.className.match(new RegExp('(\\s|^)' + className + '(\\s|$)'))
+}
+
+function addClass(el, className) {
+  if (el.classList)
+    el.classList.add(className)
+  else if (!hasClass(el, className)) el.className += " " + className
+}
+
+function removeClass(el, className) {
+  if (el.classList)
+    el.classList.remove(className)
+  else if (hasClass(el, className)) {
+    var reg = new RegExp('(\\s|^)' + className + '(\\s|$)')
+    el.className=el.className.replace(reg, ' ')
   }
+}
+
+function hexLClick(hex) {
+  if (!hasClass(hex, 'SelectedGreenHex')) {
+    addClass(hex, 'SelectedGreenHex');
+  } else {
+    removeClass(hex, 'SelectedGreenHex');
+  }
+  removeClass(hex, 'SelectedRedHex');
   CheckBadRow();
 }
 function hexRClick(hex) {
-  if (hex.style.backgroundColor != 'darkred') {
-    hex.style.backgroundColor = 'darkred';
+  if (!hasClass(hex, 'SelectedRedHex')) {
+    addClass(hex, 'SelectedRedHex');
   } else {
-    hex.style.backgroundColor = '';
+    removeClass(hex, 'SelectedRedHex');
   }
+  removeClass(hex, 'SelectedGreenHex');
   CheckBadRow();
   return false;
 }
@@ -115,10 +139,10 @@ function CheckBadRow() {
         var done = true;
         for (r = 0; r < rowList[key].length; r++) {
           hex = document.getElementById("hex" + rowList[key][r])
-          if (hex.style.backgroundColor != 'darkgreen') {
+          if (!hasClass(hex, 'SelectedGreenHex')) {
             done = false;
           }
-          if (hex.style.backgroundColor == 'darkred') {
+          if (hasClass(hex, 'SelectedRedHex')) {
             rowheader.style.backgroundColor = 'darkred';
             break;
           }
@@ -232,10 +256,11 @@ function GenerateBoard() {
   
   txtRNG = document.getElementById("rngseed");
   rngseed = txtRNG.value
-  if (rngseed == undefined) {
-    rngseed = '';//Math.floor(Math.random() * 1000000);
+  if (rngseed == undefined || rngseed == '') {
+    rngseed = Math.floor(Math.random() * 1000000).toString();
   }
-  txtRNG.value = rngseed;
+  txtRNG.value = '';
+  document.getElementById("seeddisplay").innerText = rngseed;
 
 
   window.history.replaceState(null, null,  
